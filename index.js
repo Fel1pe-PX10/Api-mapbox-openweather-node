@@ -6,6 +6,11 @@ const Busquedas = require("./models/busquedas");
 const main = async() => {
     
     const busquedas = new Busquedas();
+
+    const baseDatos = busquedas.leerDb();
+    // await pausaMenu();
+
+
     let opt = 0;
     
     do {
@@ -22,6 +27,7 @@ const main = async() => {
 
                 // Seleccionar lugar
                 const ciudadId = await listarLugares(lugares);
+                if(ciudadId === '0') continue;
                 const lugarSelec = lugares.find(l => l.id === ciudadId);
 
                 // Guardar en DB
@@ -44,7 +50,7 @@ const main = async() => {
                 await pausaMenu();
                 break;
             case 2:
-                busquedas.historial.forEach((lugar, i) => {
+                busquedas.historialCapitalizado.forEach((lugar, i) => {
                     const idx = `${i + 1}.`.green;
                     console.log(`${idx} ${lugar}`);
                 });

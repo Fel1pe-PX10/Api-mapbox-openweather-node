@@ -1,8 +1,14 @@
+// Importaciones nativas
+const fs = require('fs');
+
+// Importaciones de terceros
 const axios = require('axios');
+const { urlToHttpOptions } = require('url');
 
 class Busquedas {
     
     historial = [];
+    dbPath = './db/database.json';
 
     get paramsMapbox(){
         return {
@@ -20,8 +26,18 @@ class Busquedas {
         }
     }
 
+    get historialCapitalizado(){
+        return this.historial.map(busqueda => {
+            
+            let palabras = busqueda.split(' ');
+            palabras = palabras.map(p => p[0].toUpperCase() + p.substring(1))
+
+            return palabras.join(' ');
+        });
+    }
+
     constructor(){
-        // ToDo: Leer DB si existe 
+        this.leerDb();
     }
 
     async ciudad( lugar='' ){
@@ -79,8 +95,35 @@ class Busquedas {
 
     guardarHistorial(lugar=''){
         // ToDo: Prevenir guardados
-        if(!this.historial.includes(lugar.toLocaleLowerCase()))
-            this.historial.unshift(lugar);
+        if(!this.historial.includes(lugar.toLocaleLowerCase())){
+            this.historial.unshift(lugar.toLocaleLowerCase());
+
+            this.historial = this.historial.splice(0, 5);
+
+            // Guarar DB
+            this.guardarDb();
+        }
+            
+
+    }
+
+    guardarDb(){
+
+        const payload = {
+            historial: this.historial
+        }
+
+        fs.writeFileSync(this.dbPath, JSON.stringify(payload));
+    }
+
+    leerDb(){
+        if( !fs.existsSync(this.dbPath) )
+        return null;
+
+        const info = fs.readFileSync(this.dbPath, {encoding: 'utf-8'});
+        const data = JSON.parse(info);
+
+        this.historial = data.historial;
     }
 
 }
