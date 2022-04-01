@@ -2,13 +2,21 @@ const axios = require('axios');
 
 class Busquedas {
     
-    historial = ['Tegucigalpa', 'Madrid', 'San Jose'];
+    historial = [];
 
     get paramsMapbox(){
         return {
             'access_token': process.env.MAPBOX_KEY,
             'limit': 5,
             'language': 'es'
+        }
+    }
+
+    get paramsWeather(){
+        return {
+            'units': 'metric',
+            'lang': 'es',
+            'appid': 'f369635965b00ad16ced5da4da4b9f3b'
         }
     }
 
@@ -44,6 +52,35 @@ class Busquedas {
         console.log('ciudad:',lugar);
 
         return [];
+    }
+
+    async climaLugar(lat,lon){
+
+        try {
+            // instance axios
+            const instance = axios.create({
+                baseURL: 'https://api.openweathermap.org/data/2.5/weather',
+                params: { ...this.paramsWeather, lon, lat }
+            });
+            // resp.data
+            const resp = await instance.get();
+            //console.log(resp.data.features);
+
+            return {
+                desc: resp.data.weather[0].description,
+                min:  resp.data.main.temp_min,
+                max:  resp.data.main.temp_max,
+                temp: resp.data.main.temp
+            };
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    guardarHistorial(lugar=''){
+        // ToDo: Prevenir guardados
+        if(!this.historial.includes(lugar.toLocaleLowerCase()))
+            this.historial.unshift(lugar);
     }
 
 }
